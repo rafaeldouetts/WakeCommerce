@@ -1,4 +1,7 @@
+using System.Net;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
 using WakeCommerce.ApiService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+//Config Serilog 
+builder.Host.UseSerilog((ctx, lc) => lc
+    .WriteTo.Console(LogEventLevel.Debug)
+    .WriteTo.File($"log-{DateTime.UtcNow.ToString("dd/MM/yyyy")}.txt",
+        LogEventLevel.Warning,
+        rollingInterval: RollingInterval.Day));
 
 var app = builder.Build();
 
@@ -37,9 +46,17 @@ app.MapScalarApiReference(opt =>
 
 });
 
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+// Add Error Middleware Handdling
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
-app.UseExceptionHandler();
+//app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
