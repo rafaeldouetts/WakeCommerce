@@ -4,6 +4,9 @@ using Serilog.Events;
 using WakeCommerce.ApiService.Middleware;
 using WakeCommerce.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,22 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddDbContext<WakeCommerceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// Configurar OpenTelemetry com logs, métricas e tracing
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("WakeCommerceAPI"))
+    .WithMetrics(metrics =>
+    {
+        //metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
+        //metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
+        metrics.AddConsoleExporter();           // Exportar métricas para o console
+        metrics.AddPrometheusExporter(); // Exportar métricas para o Prometheus
+    })
+    .WithTracing(tracing =>
+    {
+        tracing.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
+        tracing.AddConsoleExporter();           // Exportar traces para o console
+    });
 
 var app = builder.Build();
 
