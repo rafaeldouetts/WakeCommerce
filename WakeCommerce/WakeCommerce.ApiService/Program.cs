@@ -1,8 +1,9 @@
-using System.Net;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using WakeCommerce.ApiService.Middleware;
+using WakeCommerce.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,22 @@ builder.Host.UseSerilog((ctx, lc) => lc
         LogEventLevel.Warning,
         rollingInterval: RollingInterval.Day));
 
+// Configuração do banco de dados (SQL Server)
+builder.Services.AddDbContext<WakeCommerceDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
 var app = builder.Build();
+
+// Aplica as migrações pendentes
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<WakeCommerceDbContext>();
+
+    // Aplica as migrações e, em seguida, faz a carga de produtos
+    dbContext.Database.Migrate();  // Aplica migrações pendentes
+    dbContext.UploadProdutos();  // Faz a carga de produtos
+}
 
 // Add Cors
 app.UseCors("AllowSpecificOrigin");
@@ -54,9 +70,6 @@ app.MapControllers();
 
 // Add Error Middleware Handdling
 app.UseMiddleware<ErrorHandlingMiddleware>();
-
-// Configure the HTTP request pipeline.
-//app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
