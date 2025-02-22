@@ -11,9 +11,4 @@
     <PackageReference Include="MediatR" Version="12.4.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\WakeCommerce.Core\WakeCommerce.Core.csproj" />
-    <ProjectReference Include="..\WakeCommerce.Domain\WakeCommerce.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

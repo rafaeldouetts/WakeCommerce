@@ -7,6 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Reflection;
+using MediatR;
+using WakeCommerce.Application.Commands;
+using WakeCommerce.Application.CommandHandlers;
+using WakeCommerce.Core.Mediator;
+using WakeCommerce.Core.Messages.CommonMessages.Notifications;
+using WakeCommerce.Domain.Repositories;
+using WakeCommerce.Infrastructure.Repository;
+using WakeCommerce.Application.Queries;
+using WakeCommerce.Application.QueryHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +56,7 @@ builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource.AddService("WakeCommerceAPI"))
     .WithMetrics(metrics =>
     {
-        //metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
+        metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
         //metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
         metrics.AddConsoleExporter();           // Exportar métricas para o console
         metrics.AddPrometheusExporter(); // Exportar métricas para o Prometheus
@@ -56,6 +66,21 @@ builder.Services.AddOpenTelemetry()
         tracing.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
         tracing.AddConsoleExporter();           // Exportar traces para o console
     });
+
+builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
+builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
+builder.Services.AddScoped<IRequestHandler<CreateProdutoCommand, bool>, CreateProdutoCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<UpdateProdutoCommand, bool>, UpdateProdutoCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<DeleteProdutoCommand, bool>, DeleteProdutoCommandHandler>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IFindProdutoQueryHandler, FindProdutoQueryHandler> ();
+
+// Configurar Mediator
+builder.Services.AddMediatR(options =>
+{
+    options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+
+});
 
 var app = builder.Build();
 

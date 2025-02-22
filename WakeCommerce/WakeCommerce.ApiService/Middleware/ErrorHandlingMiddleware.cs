@@ -28,7 +28,7 @@ namespace WakeCommerce.ApiService.Middleware
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     Title = "Erro interno do servidor, contate o administrador.",
-                    Detail = ex.Message
+                    Detail = new List<string> { ex.Message }
                 });
             }
         }

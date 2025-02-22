@@ -1,14 +1,14 @@
 ﻿namespace WakeCommerce.ApiService.Controllers.Base
 {
-    public class SuccessResponse<T>
+    public class SuccessResponse
     {
-        public SuccessResponse(T data, bool sucess, int statusCode)
+        public SuccessResponse(object? data, bool sucess, int statusCode)
         {
             Data = data;
             Sucess = sucess;
             StatusCode = statusCode;
         }
-        public T Data { get; set; }
+        public object? Data { get; set; }
         public bool Sucess { get; set; }
         public int StatusCode { get; set; }
     }
