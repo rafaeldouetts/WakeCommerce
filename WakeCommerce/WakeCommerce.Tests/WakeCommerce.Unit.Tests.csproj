@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WakeCommerce.AppHost\WakeCommerce.AppHost.csproj" />
+    <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

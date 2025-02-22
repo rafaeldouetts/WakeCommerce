@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.AppHost", "Wak
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.ApiService", "WakeCommerce.ApiService\WakeCommerce.ApiService.csproj", "{57911CBD-21A6-41F2-8011-FC397A75B824}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.Tests", "WakeCommerce.Tests\WakeCommerce.Tests.csproj", "{F0A93A11-D757-41F4-A5D4-08E974BDEC04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.Unit.Tests", "WakeCommerce.Tests\WakeCommerce.Unit.Tests.csproj", "{F0A93A11-D757-41F4-A5D4-08E974BDEC04}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.Application", "WakeCommerce.Application\WakeCommerce.Application.csproj", "{B89748E7-C453-4D0E-AA33-8E12DFD6B8D7}"
 EndProject
