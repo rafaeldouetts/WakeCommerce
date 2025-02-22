@@ -4,8 +4,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 var cache = builder.AddRedis("cache");
 
 //pacote: Aspire.Hosting.SqlServer
-var sql = builder.AddSqlServer("sql");
+var sql = builder.AddSqlServer("sql").WaitFor(cache);
 
-var apiService = builder.AddProject<Projects.WakeCommerce_ApiService>("apiservice");
+var apiService = builder.AddProject<Projects.WakeCommerce_ApiService>("apiservice").WaitFor(sql);
 
 builder.Build().Run();
