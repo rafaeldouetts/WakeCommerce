@@ -111,9 +111,6 @@ jobs:
         with:
           dotnet-version: '9.x'
           include-prerelease: true
-      
-      - name: Restore dependencies
-        run: dotnet restore
 
       - name: Generate Stryker report
         if: always()
@@ -130,4 +127,4 @@ jobs:
         if: always()
         with:
           name: dotnet-stryker-results
-          path: ./tests/Identity.Unit.Tests/StrykerOutput
+          path: ./WakeCommerce/WakeCommerce.Integration.Tests/StrykerOutput
