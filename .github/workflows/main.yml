@@ -44,12 +44,16 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
+        working-directory: WakeCommerce/WakeCommerce.Tests
 
       - name: Run Unit tests
         run: |
           dotnet tool install --global coverlet.console
           dotnet tool install --global dotnet-reportgenerator-globaltool
           dotnet test WakeCommerce/WakeCommerce.Tests/WakeCommerce.Unit.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
+        working-directory: WakeCommerce/WakeCommerce.Tests
+
+          
       - name: Generate Unit test report
         if: always()
         run: |
