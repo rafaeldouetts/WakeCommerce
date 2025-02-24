@@ -24,6 +24,17 @@ using WakeCommerce.Application.EventHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Definindo o environment a partir de uma variável de ambiente ou parâmetro customizado
+var environment = builder.Environment.EnvironmentName;
+Console.WriteLine($"Ambiente:{environment}");
+
+// Configurando o appsettings específico com base no environment
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
@@ -138,3 +149,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+public partial class Program { }

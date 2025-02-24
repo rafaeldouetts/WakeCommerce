@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -9,17 +10,25 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="FluentAssertions" Version="8.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Respawn" Version="6.2.1" />
+    <PackageReference Include="Testcontainers" Version="4.2.0" />
+    <PackageReference Include="Testcontainers.MsSql" Version="4.2.0" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WakeCommerce.ApiService\WakeCommerce.ApiService.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
   </ItemGroup>
 
 </Project>
