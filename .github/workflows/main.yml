@@ -99,4 +99,35 @@ jobs:
         with:
           name: integration-tests-results
           path: coveragereport/
-  
+
+  Stryker-tests-back-end:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.x'
+          include-prerelease: true
+      
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Generate Stryker report
+        if: always()
+        run: |
+          cd WakeCommerce/WakeCommerce.Integration.Tests/
+          dotnet tool install --global dotnet-stryker
+          dotnet test 
+          dotnet stryker --project WakeCommerce.Application/WakeCommerce.Application.csproj
+          dotnet stryker --project WakeCommerce.ApiService/WakeCommerce.ApiService.csproj
+
+      
+      - name: Upload dotnet-stryker results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dotnet-stryker-results
+          path: ./tests/Identity.Unit.Tests/StrykerOutput
