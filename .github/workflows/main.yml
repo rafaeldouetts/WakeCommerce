@@ -111,9 +111,6 @@ jobs:
         with:
           dotnet-version: '9.x'
           include-prerelease: true
-      
-      - name: Restore dependencies
-        run: dotnet restore
 
       - name: Generate Stryker report
         if: always()
