@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using WakeCommerce.Application.Commands;
+using WakeCommerce.Application.Events;
 using WakeCommerce.Application.Queries.Response;
 using WakeCommerce.Core.Mediator;
-using WakeCommerce.Core.Messages;
 using WakeCommerce.Core.Messages.CommonMessages.Notifications;
 using WakeCommerce.Domain.Entities;
 using WakeCommerce.Domain.Repositories;
@@ -13,10 +13,12 @@ namespace WakeCommerce.Application.CommandHandlers
     {
         private readonly IMediatorHandler _mediatorHandler;
         private readonly IProdutoRepository _produtoRepository;
-        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository)
+        private readonly IMediator _mediator;
+        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository, IMediator mediator)
         {
             _mediatorHandler = mediatorHandler;
             _produtoRepository = produtoRepository;
+            _mediator = mediator;
         }
 
         public async Task<ProdutoResponse?> Handle(CreateProdutoCommand message, CancellationToken cancellationToken)
@@ -42,6 +44,7 @@ namespace WakeCommerce.Application.CommandHandlers
                 Id = produto.Id
             };
 
+            await _mediator.Publish(new ProdutoCreateEvent(response));
 
             return response;
         }

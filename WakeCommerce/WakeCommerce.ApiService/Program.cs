@@ -18,6 +18,9 @@ using WakeCommerce.Infrastructure.Repository;
 using WakeCommerce.Application.Queries;
 using WakeCommerce.Application.QueryHandlers;
 using WakeCommerce.Application.Queries.Response;
+using WakeCommerce.Domain.Repository;
+using StackExchange.Redis;
+using WakeCommerce.Application.EventHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,13 +71,26 @@ builder.Services.AddOpenTelemetry()
         tracing.AddConsoleExporter();           // Exportar traces para o console
     });
 
+// Configurar a conexão com o Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    return ConnectionMultiplexer.Connect(configuration);
+});
+
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IRedisRepository, RedisRepository>();
+
 builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
 builder.Services.AddScoped<IRequestHandler<CreateProdutoCommand, ProdutoResponse?>, CreateProdutoCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<UpdateProdutoCommand, ProdutoResponse?>, UpdateProdutoCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<DeleteProdutoCommand, bool>, DeleteProdutoCommandHandler>();
-builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IFindProdutoQueryHandler, FindProdutoQueryHandler> ();
+
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ProdutoCreateEventHandler).Assembly));
+
 
 // Configurar Mediator
 builder.Services.AddMediatR(options =>
