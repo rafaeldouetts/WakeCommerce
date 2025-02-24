@@ -21,6 +21,8 @@ using WakeCommerce.Application.Queries.Response;
 using WakeCommerce.Domain.Repository;
 using StackExchange.Redis;
 using WakeCommerce.Application.EventHandlers;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +120,11 @@ builder.Services.AddMediatR(options =>
 
 });
 
+builder.Services
+        .AddHealthChecks()
+        .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddRedis(builder.Configuration.GetConnectionString("RedisConnection")!, "Redis");
+
 var app = builder.Build();
 
 // Aplica as migrações pendentes
@@ -155,6 +162,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();
 
