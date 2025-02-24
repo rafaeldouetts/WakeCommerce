@@ -1,4 +1,4 @@
-using WakeCommerce.Application.Commands;
+Ôªøusing WakeCommerce.Application.Commands;
 
 namespace WakeCommerce.Unit.Tests;
 
@@ -39,7 +39,7 @@ public class CreateProdutoCommandTests
 
         // Assert
         Assert.False(resultado);
-        Assert.Equal(command.ValidationResult.Errors.First().ErrorMessage, "O nome n„o pode ser vazio");
+        Assert.Equal(command.ValidationResult.Errors.First().ErrorMessage, "O nome n√£o pode ser vazio");
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class CreateProdutoCommandTests
 
         // Assert
         Assert.False(resultado);
-        Assert.Equal(command.ValidationResult.Errors.First().ErrorMessage, "O preÁo n„o pode ser menor que 0");
+        Assert.Equal(command.ValidationResult.Errors.First().ErrorMessage, "O pre√ßo n√£o pode ser menor que 0");
         
     }
 }
