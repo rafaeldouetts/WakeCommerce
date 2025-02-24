@@ -65,4 +65,37 @@ jobs:
         with:
           name: unit-test-results
           path: coveragereport/
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests-back-end
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.x'
+          include-prerelease: true
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+          sudo usermod -aG docker $USER
+      
+      - name: Run Integration tests
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          dotnet test WakeCommerce/WakeCommerce.Integration.Tests/WakeCommerce.Integration.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
+          reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
+        
+      - name: Upload Integration tests results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-tests-results
+          path: WakeCommerce/WakeCommerce.Integration.Tests/coveragereport/
   
