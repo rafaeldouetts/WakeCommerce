@@ -28,7 +28,7 @@ namespace WakeCommerce.ApiService.Controllers.Base
 
         public override BadRequestObjectResult BadRequest([ActionResultObjectValue] object? error)
         {
-            var result = new ProblemDatails()
+            var result = new ProblemDatails<object?>()
             {
                 Detail = error,
                 Status = StatusCodes.Status400BadRequest,
@@ -39,9 +39,16 @@ namespace WakeCommerce.ApiService.Controllers.Base
 
         public override OkObjectResult Ok([ActionResultObjectValue] object? value)
         {
-            var result = new SuccessResponse(value, true, StatusCodes.Status200OK);
+            var result = new SuccessResponse<object?>(value, true, StatusCodes.Status200OK);
 
-            return base.Ok(value);
+            return base.Ok(result);
+        }
+
+        public ObjectResult Created([ActionResultObjectValue] object? value)
+        {
+            var result = new SuccessResponse<object?>(value, true, StatusCodes.Status200OK);
+
+            return StatusCode(StatusCodes.Status201Created, result);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace WakeCommerce.ApiService.Middleware
 
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-                await context.Response.WriteAsJsonAsync(new ProblemDatails()
+                await context.Response.WriteAsJsonAsync(new ProblemDatails<List<string>>()
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     Title = "Erro interno do servidor, contate o administrador.",

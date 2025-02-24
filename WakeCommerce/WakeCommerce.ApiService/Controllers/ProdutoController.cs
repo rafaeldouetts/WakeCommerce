@@ -30,14 +30,14 @@ namespace WakeCommerce.ApiService.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Post([FromBody] CreateProdutoCommand command)
         {
-            await _mediator.Send(command);
+            var produtoCriado = await _mediator.Send(command);
 
             if(!OperacaoValida())
             {
                 return BadRequest(ObterMensagensErro());
             }
 
-            return Created();
+            return Created(produtoCriado);
         }
 
         [HttpPut("{id}")]
@@ -46,14 +46,14 @@ namespace WakeCommerce.ApiService.Controllers
             if (command.Id != id)
                 return BadRequest();
 
-            await _mediator.Send(command);
+            var produtoAtualizado = await _mediator.Send(command);
 
             if (!OperacaoValida())
             {
                 return BadRequest(ObterMensagensErro());
             }
 
-            return Ok();
+            return Ok(produtoAtualizado);
         }
 
         [HttpDelete("{id}")]
