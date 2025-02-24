@@ -5,6 +5,7 @@ using Azure;
 using FluentAssertions;
 using WakeCommerce.ApiService.Controllers.Base;
 using WakeCommerce.Application.Commands;
+using WakeCommerce.Application.Queries.Request;
 using WakeCommerce.Application.Queries.Response;
 using WakeCommerce.Domain.Entities;
 using WakeCommerce.NIntegration.Tests.Fixtures;
@@ -37,8 +38,24 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             result.Data.Nome.Should().Be(produto.Nome);
             result.Data.Preco.Should().Be(produto.Preco);
         }
-
         [Test, Order(1)]
+        public async Task BuscarProdutosPreCarregados_DeveRetornar200Ok_QuandoDadosValidos()
+        {
+            // Arrange
+            var request = new GetProdutoRequest();
+
+            // Act
+            var response = await _fixture.ServerClient.PostAsJsonAsync($"/produto/ordenar/", request);
+
+            var result = await response.Content.ReadFromJsonAsync<SuccessResponse<IEnumerable<ProdutoResponse>>>();
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            result!.Data.Should().NotBeNull();
+            result!.Data.Should().NotBeEmpty();
+        }
+
+        [Test, Order(2)]
         public async Task CriarProduto_DeveRetornar400BadRequest_QuandoNomeVazio()
         {
             // Arrange
@@ -59,7 +76,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             result.Detail.Should().Contain("O nome não pode ser vazio");
         }
 
-        [Test, Order(2)]
+        [Test, Order(3)]
         public async Task CriarProduto_DeveRetornar400BadRequest_QuandoPrecoMenorOuIgualAZero()
         {
             // Arrange
@@ -81,7 +98,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
         }
 
         //Delete
-        [Test, Order(3)]
+        [Test, Order(4)]
         public async Task DeleteProduto_DeveRetornarNotFound_QuandoProdutoExistir()
         {
             // Arrange - Criando um produto antes de tentar deletar
@@ -102,7 +119,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        [Test, Order(4)]
+        [Test, Order(5)]
         public async Task DeleteProduto_DeveRetornarNotFound_QuandoProdutoNaoExistir()
         {
             // Act - Tentando deletar um produto com um ID inexistente
@@ -112,7 +129,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
-        [Test, Order(5)]
+        [Test, Order(6)]
         public async Task DeleteProduto_DeveRetornarBadRequest_QuandoIdForZero()
         {
             // Act
@@ -124,7 +141,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
 
         //update
 
-        [Test, Order(6)]
+        [Test, Order(7)]
         public async Task AtualizarProduto_DeveRetornar200Ok_QuandoDadosValidos()
         {
             // Arrange
@@ -153,13 +170,45 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             var result = await response.Content.ReadFromJsonAsync<SuccessResponse<ProdutoResponse>>();
 
             // Assert
-            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
             result.Should().NotBeNull();
             result.Data.Nome.Should().Be(produtoAtualizado.Nome);
             result.Data.Preco.Should().Be(produtoAtualizado.Preco);
         }
 
-        [Test, Order(7)]
+        [Test, Order(8)]
+        public async Task AtualizarProduto_DeveRetornar400Badrequest_QuandoIdDivergente()
+        {
+            // Arrange
+
+            var novoProduto = new { Nome = "Produto Teste", Descricao = "Descrição", Preco = 10.0m, Estoque = 5 };
+            var response = await _fixture.ServerClient.PostAsJsonAsync("/produto/create", novoProduto);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var successResponse = JsonSerializer.Deserialize<SuccessResponse<ProdutoResponse>>(json, options);
+
+            var produtoAtualizado = new UpdateProdutoCommand
+            {
+                Id = successResponse.Data.Id,
+                Nome = "Produto Atualizado",
+                Descricao = "Descrição atualizada",
+                Preco = 79.99m,
+                Estoque = 15
+            };
+
+            // Act
+            response = await _fixture.ServerClient.PutAsJsonAsync($"/produto/{successResponse.Data.Id + 1}", produtoAtualizado);
+            var result = await response.Content.ReadFromJsonAsync<SuccessResponse<ProdutoResponse>>();
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Test, Order(9)]
         public async Task AtualizarProduto_DeveRetornar400BadRequest_QuandoNomeVazio()
         {
             // Arrange
@@ -182,7 +231,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             result.Detail.Should().Contain("O nome não pode ser vazio");
         }
 
-        [Test, Order(8)]
+        [Test, Order(10)]
         public async Task AtualizarProduto_DeveRetornar400BadRequest_QuandoPrecoMenorOuIgualAZero()
         {
             // Arrange
@@ -205,7 +254,7 @@ namespace WakeCommerce.NIntegration.Tests.Controller
             result.Detail.Should().Contain("O preço não pode ser menor que 0");
         }
 
-        [Test, Order(9)]
+        [Test, Order(11)]
         public async Task AtualizarProduto_DeveRetornar400NotFound_QuandoProdutoNaoExiste()
         {
             // Arrange
@@ -224,6 +273,95 @@ namespace WakeCommerce.NIntegration.Tests.Controller
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        //Get - by-id
+        [Test, Order(12)]
+        public async Task BuscarProdutoPordId_DeveRetornar200Ok_QuandoDadosValidos()
+        {
+            // Arrange
+
+            var novoProduto = new { Nome = "Produto Teste", Descricao = "Descrição", Preco = 10.0m, Estoque = 5 };
+            var response = await _fixture.ServerClient.PostAsJsonAsync("/produto/create", novoProduto);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var successResponse = JsonSerializer.Deserialize<SuccessResponse<ProdutoResponse>>(json, options);
+
+            // Act
+            response = await _fixture.ServerClient.GetAsync($"/produto/by-id/{successResponse.Data.Id}");
+            var result = await response.Content.ReadFromJsonAsync<SuccessResponse<ProdutoResponse>>();
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            result.Should().NotBeNull();
+            result.Data.Nome.Should().Be(novoProduto.Nome);
+            result.Data.Preco.Should().Be(novoProduto.Preco);
+        }
+
+        //Get - by-nome
+        [Test, Order(13)]
+        public async Task BuscarProdutoPorNome_DeveRetornar200Ok_QuandoDadosValidos()
+        {
+            // Arrange
+
+            var novoProduto = new { Nome = "Produto Por Nome", Descricao = "Descrição", Preco = 10.0m, Estoque = 5 };
+            var response = await _fixture.ServerClient.PostAsJsonAsync("/produto/create", novoProduto);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var successResponse = JsonSerializer.Deserialize<SuccessResponse<ProdutoResponse>>(json, options);
+
+            var request = new GetProdutoByNomeRequest()
+            {
+                Nome = novoProduto.Nome
+            };
+
+            // Act
+            response = await _fixture.ServerClient.PostAsJsonAsync($"/produto/by-nome/", request);
+            var result = await response.Content.ReadFromJsonAsync<SuccessResponse<ProdutoResponse>>();
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            result.Should().NotBeNull();
+            result.Data.Nome.Should().Be(novoProduto.Nome);
+            result.Data.Preco.Should().Be(novoProduto.Preco);
+        }
+
+        //Get - order
+        [Test, Order(14)]
+        public async Task BuscarProdutoOrdenado_DeveRetornar200Ok_QuandoDadosValidos()
+        {
+            // Arrange
+
+            var novoProduto = new { Nome = "Produto Ordenado", Descricao = "Descrição", Preco = 777.0m, Estoque = 7 };
+            var response = await _fixture.ServerClient.PostAsJsonAsync("/produto/create", novoProduto);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var successResponse = JsonSerializer.Deserialize<SuccessResponse<ProdutoResponse>>(json, options);
+
+            var request = new GetProdutoRequest();
+
+            // Act
+            response = await _fixture.ServerClient.PostAsJsonAsync($"/produto/ordenar/", request);
+
+            var result = await response.Content.ReadFromJsonAsync<SuccessResponse<IEnumerable<ProdutoResponse>>>();
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            result!.Data.Should().NotBeNull();
+            result!.Data.Should().NotBeEmpty();
+            result!.Data.Should().ContainSingle(p => p.Nome == novoProduto.Nome && p.Preco == novoProduto.Preco);
         }
     }
 }

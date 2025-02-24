@@ -89,7 +89,7 @@ namespace WakeCommerce.ApiService.Controllers
         }
 
         [HttpPost("ordenar")]
-        public async Task<ActionResult<IEnumerable<Produto>>> OrdenarProdutosPorCategoria([FromBody] GetProdutoRequest query)
+        public async Task<IActionResult> OrdenarProdutosPorCategoria([FromBody] GetProdutoRequest query)
         {
             var result = await _findProdutoQueryHandler.GetProdutos(query);
 
