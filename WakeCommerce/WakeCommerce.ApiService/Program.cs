@@ -89,6 +89,14 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(configuration);
 });
 
+// Registra o Redis como implementação do IDistributedCache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var connection = builder.Services.BuildServiceProvider().GetRequiredService<IConnectionMultiplexer>();
+
+    options.ConnectionMultiplexerFactory = () => Task.FromResult(connection); // Usa o IConnectionMultiplexer registrado para o Redis
+});
+
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IRedisRepository, RedisRepository>();
 

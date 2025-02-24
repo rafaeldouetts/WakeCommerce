@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
+using WakeCommerce.NIntegration.Tests.Fixtures.Base;
 
 namespace WakeCommerce.NIntegration.Tests.ExternalServices
 {
-    internal class RedisTestFixture
+    public sealed class RedisTestFixture : TestFixtureBase
     {
+        public Guid CreatedTenantId { get; } = Guid.NewGuid();
+        public IDistributedCache DistributedCache { get; }
+
+        public RedisTestFixture()
+        {
+            DistributedCache = Factory.Services.GetRequiredService<IDistributedCache>();
+        }
     }
 }
