@@ -58,7 +58,7 @@ jobs:
         if: always()
         run: |
           reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
-          cd tests/Identity.Unit.Tests/
+          cd WakeCommerce/WakeCommerce.Tests
       - name: Upload Unit test results
         uses: actions/upload-artifact@v4
         if: always()
