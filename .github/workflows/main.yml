@@ -154,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report-back-end
-          path: trivy-report.html
+          path: ./WakeCommerce/trivy-report.html
           
   Stryker-tests-back-end:
     runs-on: ubuntu-latest
