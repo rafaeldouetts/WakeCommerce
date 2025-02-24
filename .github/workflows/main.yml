@@ -197,3 +197,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: rafaeldouetts/wakecommerce
           tags: latest, ${{ github.run_number }}
+          working-directory: WakeCommerce/
