@@ -1,0 +1,63 @@
+name: Build and test ASP.Net Core - WakeCoomerce
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  build-back-end:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.x'
+          include-prerelease: true
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+          
+  unit-tests-back-end:
+    runs-on: ubuntu-latest
+    needs: build-back-end
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.x'
+          include-prerelease: true
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Unit tests
+        run: |
+          dotnet tool install --global coverlet.console
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          dotnet test WakeCommerce/WakeCommerce.Tests/WakeCommerce.Unit.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
+      - name: Generate Unit test report
+        if: always()
+        run: |
+          reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
+          cd tests/Identity.Unit.Tests/
+      - name: Upload Unit test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: unit-test-results
+          path: coveragereport/
+  
