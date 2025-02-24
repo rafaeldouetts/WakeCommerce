@@ -21,6 +21,7 @@ namespace WakeCommerce.Application.QueryHandlers
 
             var response = new ProdutoResponse()
             {
+                Id = produto.Id,
                 Descricao = produto.Descricao,
                 Estoque = produto.Estoque,
                 Nome = produto.Nome,
@@ -36,6 +37,7 @@ namespace WakeCommerce.Application.QueryHandlers
 
             var response = new ProdutoResponse() 
             { 
+                Id = produto.Id,
                 Descricao = produto.Descricao,
                 Estoque = produto.Estoque,
                 Nome = produto.Nome,
