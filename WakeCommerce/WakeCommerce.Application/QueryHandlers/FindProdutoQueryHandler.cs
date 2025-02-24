@@ -32,6 +32,8 @@ namespace WakeCommerce.Application.QueryHandlers
 
             var produto = await _produtoRepository.GetById(request.Id);
 
+            if (produto == null) return null;
+
             var response = new ProdutoResponse()
             {
                 Id = produto.Id,
@@ -48,7 +50,7 @@ namespace WakeCommerce.Application.QueryHandlers
         {
             var produtoCache = await _redisRepository.ObterProdutoDoRedisAsync(request.Nome);
 
-            if (string.IsNullOrEmpty(produtoCache))
+            if (!string.IsNullOrEmpty(produtoCache))
             {
                 var result = JsonSerializer.Deserialize<ProdutoResponse>(produtoCache);
 
@@ -56,6 +58,8 @@ namespace WakeCommerce.Application.QueryHandlers
             }
 
             var produto = await _produtoRepository.GetByNome(request.Nome);
+
+            if (produto == null) return null;
 
             var response = new ProdutoResponse() 
             { 

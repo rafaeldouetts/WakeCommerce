@@ -75,7 +75,10 @@ namespace WakeCommerce.ApiService.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var query = new GetProdutoByIdRequest(id);
+
             var result = await _findProdutoQueryHandler.GetProdutoById(query);
+
+            if (result == null) return StatusCode(StatusCodes.Status404NotFound);
 
             return Ok(result);
         }
@@ -84,6 +87,8 @@ namespace WakeCommerce.ApiService.Controllers
         public async Task<IActionResult> GetByNome([FromBody] GetProdutoByNomeRequest query)
         {
             var result = await _findProdutoQueryHandler.GetProdutoByNome(query);
+
+            if (result == null) return StatusCode(StatusCodes.Status404NotFound);
 
             return Ok(result);
         }
