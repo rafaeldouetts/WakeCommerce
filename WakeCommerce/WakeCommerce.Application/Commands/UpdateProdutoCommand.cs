@@ -1,18 +1,21 @@
 ﻿using FluentValidation;
-using WakeCommerce.Core.Messages;
+using FluentValidation.Results;
+using MediatR;
+using WakeCommerce.Application.Queries.Response;
 
 
 namespace WakeCommerce.Application.Commands
 {
-    public class UpdateProdutoCommand : Command
+    public class UpdateProdutoCommand : IRequest<ProdutoResponse?>
     {
         public int Id { get; set; }
         public string Nome { get; set; }
         public string Descricao { get; set; }
         public decimal Preco { get; set; }
         public int Estoque { get; set; }
+        public ValidationResult? ValidationResult { get; set; }
 
-        public override bool EhValido()
+        public bool EhValido()
         {
             ValidationResult = new UpdateProdutoValidation().Validate(this);
             return ValidationResult.IsValid;

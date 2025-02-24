@@ -17,6 +17,7 @@ using WakeCommerce.Domain.Repositories;
 using WakeCommerce.Infrastructure.Repository;
 using WakeCommerce.Application.Queries;
 using WakeCommerce.Application.QueryHandlers;
+using WakeCommerce.Application.Queries.Response;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,8 +70,8 @@ builder.Services.AddOpenTelemetry()
 
 builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
-builder.Services.AddScoped<IRequestHandler<CreateProdutoCommand, bool>, CreateProdutoCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<UpdateProdutoCommand, bool>, UpdateProdutoCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<CreateProdutoCommand, ProdutoResponse?>, CreateProdutoCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<UpdateProdutoCommand, ProdutoResponse?>, UpdateProdutoCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<DeleteProdutoCommand, bool>, DeleteProdutoCommandHandler>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IFindProdutoQueryHandler, FindProdutoQueryHandler> ();
