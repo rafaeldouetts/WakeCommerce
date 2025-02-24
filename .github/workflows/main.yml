@@ -129,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dotnet-stryker-results
+          name: dotnet-bdd-results
           path: ./WakeCommerce/ExtentReport.html
           
   Stryker-tests-back-end:
