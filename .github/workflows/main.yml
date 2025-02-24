@@ -91,11 +91,12 @@ jobs:
           dotnet tool install --global dotnet-reportgenerator-globaltool
           dotnet test WakeCommerce/WakeCommerce.Integration.Tests/WakeCommerce.Integration.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
           reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
+          cd WakeCommerce/WakeCommerce.Integration.Tests
         
       - name: Upload Integration tests results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-tests-results
-          path: WakeCommerce/WakeCommerce.Integration.Tests/coveragereport/
+          path: coveragereport/
   
