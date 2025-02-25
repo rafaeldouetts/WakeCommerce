@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using WakeCommerce.Application.Events;
 using WakeCommerce.Domain.Repository;
 
 namespace WakeCommerce.Application.Events.EventHandlers

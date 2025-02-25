@@ -19,6 +19,8 @@ using Serilog;
 using Serilog.Events;
 using WakeCommerce.Application.CommandHandlers;
 using WakeCommerce.Application.QueryHandlers;
+using WakeCommerce.Application.Events;
+using WakeCommerce.Application.Events.EventHandlers;
 
 namespace WakeCommerce.ApiService.Extenssions
 {
@@ -136,6 +138,8 @@ namespace WakeCommerce.ApiService.Extenssions
 
             services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
             services.AddScoped<IMediatorHandler, MediatorHandler>();
+
+            services.AddScoped<INotificationHandler<ProdutoCreateEvent>, ProdutoCreateEventHandler>();
 
             services.AddScoped<IFindProdutoQueryHandler, FindProdutoQueryHandler>();
         }
