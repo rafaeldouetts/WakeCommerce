@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sqlserver-exporter-monitor
+  namespace: wakecommerce
+spec:
+  selector:
+    matchLabels:
+      app: sqlserver-exporter
+  endpoints:
+    - port: "9100"
+      interval: 30s  # Frequência de scrape

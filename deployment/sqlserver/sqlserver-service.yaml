@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sqlserver
+  namespace: wakecommerce
+spec:
+  type: ClusterIP  # Ou "NodePort" se você quiser expor externamente
+  ports:
+    - port: 1433
+      targetPort: 1433
+      protocol: TCP
+  selector:
+    app: sqlserver

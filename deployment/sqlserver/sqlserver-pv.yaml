@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sqlserver-pv
+  namespace: wakecommerce
+spec:
+  capacity:
+    storage: 1000Gi  # Ajuste para 1000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:  # Usando hostPath para desenvolvimento/local
+    path: /mnt/data/sqlserver  # Caminho no nó do Kubernetes

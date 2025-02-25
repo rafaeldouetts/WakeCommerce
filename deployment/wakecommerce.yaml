@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wakecommerce
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wakecommerce
+  namespace: wakecommerce
+spec:
+  selector:
+    matchLabels:
+      run: wakecommerce
+  template:
+    metadata:
+      labels:
+        run: wakecommerce
+    spec:
+      containers:
+      - name: wakecommerce
+        image: rafaeldouetts/wakecommerce
+        ports:
+        - containerPort: 8080
+        - containerPort: 8081
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wakecommerce-service
+  namespace: wakecommerce
+spec:
+  selector:
+    run: wakecommerce
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 5001
+      targetPort: 8080
+    - name: https
+      port: 5002
+      targetPort: 8081
