@@ -134,7 +134,7 @@ jobs:
 
   trivy-scan-back-end:
     runs-on: ubuntu-latest
-    needs:  build-back-end
+    needs:  Stryker-tests-back-end
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
