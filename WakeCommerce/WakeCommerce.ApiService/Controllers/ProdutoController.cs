@@ -5,7 +5,6 @@ using WakeCommerce.Application.Queries;
 using WakeCommerce.Application.Queries.Request;
 using WakeCommerce.Core.Mediator;
 using WakeCommerce.Core.Messages.CommonMessages.Notifications;
-using WakeCommerce.Domain.Entities;
 
 namespace WakeCommerce.ApiService.Controllers
 {

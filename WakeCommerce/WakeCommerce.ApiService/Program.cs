@@ -23,6 +23,7 @@ using StackExchange.Redis;
 using WakeCommerce.Application.EventHandlers;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using WakeCommerce.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,6 +125,10 @@ builder.Services
         .AddHealthChecks()
         .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         .AddRedis(builder.Configuration.GetConnectionString("RedisConnection")!, "Redis");
+
+
+// add automapper 
+builder.Services.AddAutoMapper(typeof(ProdutoProfile).Assembly);
 
 var app = builder.Build();
 

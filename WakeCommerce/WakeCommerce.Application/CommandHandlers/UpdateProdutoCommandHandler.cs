@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Queries.Response;
 using WakeCommerce.Core.Mediator;
@@ -11,11 +12,12 @@ namespace WakeCommerce.Application.CommandHandlers
     {
         private readonly IProdutoRepository _produtoRepository;
         private readonly IMediatorHandler _mediatorHandler;
-        
-        public UpdateProdutoCommandHandler(IProdutoRepository produtoRepository, IMediatorHandler mediatorHandler)
+        private readonly IMapper _mapper;
+        public UpdateProdutoCommandHandler(IProdutoRepository produtoRepository, IMediatorHandler mediatorHandler, IMapper mapper)
         {
             _produtoRepository = produtoRepository;
             _mediatorHandler = mediatorHandler;
+            _mapper = mapper;
         }
 
         public async Task<ProdutoResponse?> Handle(UpdateProdutoCommand request, CancellationToken cancellationToken)
@@ -37,15 +39,7 @@ namespace WakeCommerce.Application.CommandHandlers
 
             await _produtoRepository.Update(produto);
 
-            var response = new ProdutoResponse()
-            {
-                Descricao = produto.Descricao,
-                Nome = produto.Nome,
-                Preco = produto.Preco,
-                Estoque = produto.Estoque,
-                Id = produto.Id
-
-            };
+            var response = _mapper.Map<ProdutoResponse>(produto);
 
             return response;
         }

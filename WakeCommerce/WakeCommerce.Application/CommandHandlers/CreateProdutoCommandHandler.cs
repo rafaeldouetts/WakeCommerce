@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Events;
 using WakeCommerce.Application.Queries.Response;
@@ -14,35 +15,24 @@ namespace WakeCommerce.Application.CommandHandlers
         private readonly IMediatorHandler _mediatorHandler;
         private readonly IProdutoRepository _produtoRepository;
         private readonly IMediator _mediator;
-        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository, IMediator mediator)
+        private readonly IMapper _mapper;
+        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository, IMediator mediator, IMapper mapper)
         {
             _mediatorHandler = mediatorHandler;
             _produtoRepository = produtoRepository;
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         public async Task<ProdutoResponse?> Handle(CreateProdutoCommand message, CancellationToken cancellationToken)
         {
             if (!ValidarComando(message)) return null;
 
-            var produto = new Produto()
-            { 
-                Estoque = message.Estoque,
-                Descricao = message.Descricao,
-                Nome = message.Nome,
-                Preco = message.Preco
-            };
+            var produto = _mapper.Map<Produto>(message);
 
             await _produtoRepository.Adicionar(produto);
 
-            var response = new ProdutoResponse()
-            {
-                Descricao = produto.Descricao,
-                Nome = produto.Nome,
-                Preco = produto.Preco,
-                Estoque = produto.Estoque,
-                Id = produto.Id
-            };
+            var response = _mapper.Map<ProdutoResponse>(produto);
 
             await _mediator.Publish(new ProdutoCreateEvent(response));
 
