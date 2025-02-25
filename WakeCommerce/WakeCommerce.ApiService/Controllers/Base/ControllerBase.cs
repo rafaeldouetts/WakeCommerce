@@ -8,14 +8,12 @@ namespace WakeCommerce.ApiService.Controllers.Base
 {
     public class ControllerBase : Controller
     {
-        private readonly IMediatorHandler _mediatorHandler;
         private readonly DomainNotificationHandler _notifications;
-        protected ControllerBase(INotificationHandler<DomainNotification> notifications,
-                                IMediatorHandler mediatorHandler)
+        protected ControllerBase(INotificationHandler<DomainNotification> notifications)
         {
             _notifications = (DomainNotificationHandler)notifications;
-            _mediatorHandler = mediatorHandler;
         }
+        
 
         protected bool OperacaoValida()
         {
@@ -44,11 +42,12 @@ namespace WakeCommerce.ApiService.Controllers.Base
             return base.Ok(result);
         }
 
-        public ObjectResult Created([ActionResultObjectValue] object? value)
+        public override CreatedResult Created(string? uri, [ActionResultObjectValue] object? value)
         {
-            var result = new SuccessResponse<object?>(value, true, StatusCodes.Status200OK);
+            var result = new SuccessResponse<object?>(value, true, StatusCodes.Status201Created);
 
-            return StatusCode(StatusCodes.Status201Created, result);
+            return base.Created(uri, result);
         }
+
     }
 }

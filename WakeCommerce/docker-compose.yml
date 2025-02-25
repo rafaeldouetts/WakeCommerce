@@ -37,8 +37,8 @@ services:
     build: 
       context: .
     environment:
-      - ENVIRONMENT_NAME=Development
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ENVIRONMENT_NAME=Test
+      - ASPNETCORE_ENVIRONMENT=Test
     ports:
       - "5000:8081"
       - "5001:8080"

@@ -19,8 +19,8 @@ namespace WakeCommerce.ApiService.Controllers
             INotificationHandler<DomainNotification> notifications, 
             IMediatorHandler mediatorHandler, 
             IMediator mediator, 
-            IFindProdutoQueryHandler findProdutoQueryHandler) 
-            : base(notifications, mediatorHandler)
+            IFindProdutoQueryHandler findProdutoQueryHandler)
+            : base(notifications)
         {
             _mediator = mediator;
             _findProdutoQueryHandler = findProdutoQueryHandler;
@@ -31,12 +31,12 @@ namespace WakeCommerce.ApiService.Controllers
         {
             var produtoCriado = await _mediator.Send(command);
 
-            if(!OperacaoValida())
+            if (!OperacaoValida())
             {
                 return BadRequest(ObterMensagensErro());
             }
 
-            return Created(produtoCriado);
+            return Created("by-id", produtoCriado);
         }
 
         [HttpPut("{id}")]
@@ -59,7 +59,7 @@ namespace WakeCommerce.ApiService.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var command = new DeleteProdutoCommand(id);
-            
+
             await _mediator.Send(command);
 
             if (!OperacaoValida())
