@@ -31,8 +31,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <ProjectReference Include="..\WakeCommerce.ApiService\WakeCommerce.ApiService.csproj" />
-    <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
+    <ProjectReference Include="..\..\src\WakeCommerce.ApiService\WakeCommerce.ApiService.csproj" />
+    <ProjectReference Include="..\..\src\WakeCommerce.Application\WakeCommerce.Application.csproj" />
   </ItemGroup>
 
 </Project>

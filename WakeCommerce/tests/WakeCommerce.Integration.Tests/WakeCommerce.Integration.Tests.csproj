@@ -23,12 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="NUnit.Framework" />
+    <ProjectReference Include="..\..\src\WakeCommerce.ApiService\WakeCommerce.ApiService.csproj" />
+    <ProjectReference Include="..\..\src\WakeCommerce.Application\WakeCommerce.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WakeCommerce.ApiService\WakeCommerce.ApiService.csproj" />
-    <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
+    <Using Include="NUnit.Framework" />
   </ItemGroup>
 
 </Project>

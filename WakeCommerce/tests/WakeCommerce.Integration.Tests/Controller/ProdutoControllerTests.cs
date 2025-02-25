@@ -1,14 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Azure;
 using FluentAssertions;
-using Microsoft.Extensions.Caching.Distributed;
 using WakeCommerce.ApiService.Controllers.Base;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Queries.Request;
 using WakeCommerce.Application.Queries.Response;
-using WakeCommerce.Domain.Entities;
 using WakeCommerce.NIntegration.Tests.ExternalServices;
 using WakeCommerce.NIntegration.Tests.Fixtures;
 

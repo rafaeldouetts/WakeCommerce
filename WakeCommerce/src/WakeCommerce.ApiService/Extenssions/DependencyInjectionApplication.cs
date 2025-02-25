@@ -5,12 +5,10 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using StackExchange.Redis;
 using System.Reflection;
-using WakeCommerce.Application.CommandHandlers;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Mappings;
 using WakeCommerce.Application.Queries.Response;
 using WakeCommerce.Application.Queries;
-using WakeCommerce.Application.QueryHandlers;
 using WakeCommerce.Core.Mediator;
 using WakeCommerce.Core.Messages.CommonMessages.Notifications;
 using WakeCommerce.Domain.Repositories;
@@ -19,6 +17,8 @@ using WakeCommerce.Infrastructure.Data;
 using WakeCommerce.Infrastructure.Repository;
 using Serilog;
 using Serilog.Events;
+using WakeCommerce.Application.CommandHandlers;
+using WakeCommerce.Application.QueryHandlers;
 
 namespace WakeCommerce.ApiService.Extenssions
 {

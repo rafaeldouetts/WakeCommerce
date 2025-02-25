@@ -2,7 +2,7 @@
 using WakeCommerce.Application.Events;
 using WakeCommerce.Domain.Repository;
 
-namespace WakeCommerce.Application.EventHandlers
+namespace WakeCommerce.Application.Events.EventHandlers
 {
     public class ProdutoCreateEventHandler : INotificationHandler<ProdutoCreateEvent>
     {

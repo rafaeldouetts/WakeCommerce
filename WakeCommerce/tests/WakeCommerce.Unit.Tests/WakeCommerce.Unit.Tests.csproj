@@ -17,9 +17,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <ProjectReference Include="..\WakeCommerce.AppHost\WakeCommerce.AppHost.csproj" />
-    <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
+    <ProjectReference Include="..\..\src\WakeCommerce.Application\WakeCommerce.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
