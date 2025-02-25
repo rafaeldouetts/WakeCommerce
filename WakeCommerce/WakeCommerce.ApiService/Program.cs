@@ -77,7 +77,13 @@ builder.Services.AddOpenTelemetry()
         metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
         //metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
         metrics.AddConsoleExporter();           // Exportar métricas para o console
-        metrics.AddPrometheusExporter(); // Exportar métricas para o Prometheus
+        metrics.AddPrometheusExporter(options =>
+        {
+            options.ScrapeEndpointPath = "/metrics"; // Definir endpoint
+            options.ScrapeResponseCacheDurationMilliseconds = 5000; // Atualizar a cada 5s
+        });
+
+        // Exportar métricas para o Prometheus
     })
     .WithTracing(tracing =>
     {
@@ -141,6 +147,9 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();  // Aplica migrações pendentes
     dbContext.UploadProdutos();  // Faz a carga de produtos
 }
+
+//add opentelemetry exporter prometheus 
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 // Add Cors
 app.UseCors("AllowSpecificOrigin");
