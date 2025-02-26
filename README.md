@@ -194,7 +194,7 @@ Implementar Domain Events para permitir que ações específicas, como o armazen
 Implemente monitoramento da aplicação, incluindo logs e métricas de performance, para garantir que a operação seja eficiente e qualquer problema seja rapidamente detectado.
 
 ## 2.11 BDD (Behavior-Driven Development)
-![alt text](docs/image-2.png)
+![alt text](docs/image-0.png)
 Adote a prática de BDD para garantir que os requisitos de negócio sejam claramente definidos e compreendidos por todas as partes envolvidas no desenvolvimento.
 
 ## 2.12 OpenTelemetry
