@@ -36,9 +36,9 @@ namespace WakeCommerce.ApiService.Extenssions
             builder.Services.AddOpenApi();
 
             //builder.Services.AddSerilogLogging();
-            builder.Services.AddDatabase(builder.Configuration);
+            builder.Services.AddDatabase(builder);
             builder.Services.AddOpenTelemetry(builder.Configuration);
-            builder.Services.AddRedisCache(builder.Configuration);
+            builder.Services.AddRedisCache(builder);
             builder.Services.AddDICors(builder.Configuration);
 
             builder.Services.AddRepository(builder.Configuration);
@@ -64,10 +64,17 @@ namespace WakeCommerce.ApiService.Extenssions
                         );
         }
 
-        private static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
+        private static void AddDatabase(this IServiceCollection services, WebApplicationBuilder builder)
         {
-            services.AddDbContext<WakeCommerceDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            var environment = builder.Environment.EnvironmentName;
+
+            if (environment == "Aspire")
+            {
+                builder.AddSqlServerDbContext<WakeCommerceDbContext>("sql");
+            }
+            else
+                services.AddDbContext<WakeCommerceDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         }
 
         private static void AddOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
@@ -78,7 +85,7 @@ namespace WakeCommerce.ApiService.Extenssions
                     {
                         metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
                                                  //metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
-                        metrics.AddConsoleExporter();           // Exportar métricas para o console
+                        //metrics.AddConsoleExporter();           // Exportar métricas para o console
                         metrics.AddPrometheusExporter(options =>
                         {
                             options.ScrapeEndpointPath = "/metrics"; // Definir endpoint
@@ -88,7 +95,7 @@ namespace WakeCommerce.ApiService.Extenssions
                     .WithTracing(tracing =>
                     {
                         tracing.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
-                        tracing.AddConsoleExporter();           // Exportar traces para o console
+                        //tracing.AddConsoleExporter();           // Exportar traces para o console
                     });
 
             // Configuração de HealthChecks
@@ -97,19 +104,29 @@ namespace WakeCommerce.ApiService.Extenssions
                 .AddRedis(configuration.GetConnectionString("RedisConnection")!, "Redis");
         }
 
-        private static void AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+        private static void AddRedisCache(this IServiceCollection services, WebApplicationBuilder builder)
         {
-            services.AddSingleton<IConnectionMultiplexer>(sp =>
-            {
-                var connection = configuration.GetConnectionString("RedisConnection");
-                return ConnectionMultiplexer.Connect(connection);
-            });
+            var environment = builder.Environment.EnvironmentName;
 
-            services.AddStackExchangeRedisCache(options =>
+            if (environment == "Aspire")
             {
-                var connection = services.BuildServiceProvider().GetRequiredService<IConnectionMultiplexer>();
-                options.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
-            });
+                builder.AddRedisDistributedCache("cache");
+            }
+            else
+            {
+                services.AddSingleton<IConnectionMultiplexer>(sp =>
+                {
+                    var connection = builder.Configuration.GetConnectionString("RedisConnection");
+                    return ConnectionMultiplexer.Connect(connection);
+                });
+
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    var connection = services.BuildServiceProvider().GetRequiredService<IConnectionMultiplexer>();
+                    options.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
+                });
+            }
+
         }
 
         private static void AddDICors(this IServiceCollection services, IConfiguration configuration)

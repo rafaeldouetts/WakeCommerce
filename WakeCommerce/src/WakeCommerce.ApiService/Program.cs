@@ -7,6 +7,7 @@ using HealthChecks.UI.Client;
 using WakeCommerce.ApiService.Extenssions;
 using Serilog;
 using Serilog.Events;
+using WakeCommerce.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,7 @@ builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables();
-
+.AddEnvironmentVariables();
 
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console(LogEventLevel.Debug)
@@ -29,6 +29,10 @@ builder.Host.UseSerilog((ctx, lc) => lc
         rollingInterval: RollingInterval.Day));
 
 builder.Services.AddDependencies(builder);
+
+
+// Add service defaults & Aspire client integrations.
+builder.AddServiceDefaults();
 
 var app = builder.Build();
 
@@ -66,7 +70,7 @@ app.MapControllers();
 // Add Error Middleware Handdling
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || environment == "Aspire")
 {
     app.MapOpenApi();
 }

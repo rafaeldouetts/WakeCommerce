@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.1.0" />
     <PackageReference Include="AspNetCore.HealthChecks.ApplicationStatus" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
@@ -40,6 +42,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WakeCommerce.Application\WakeCommerce.Application.csproj" />
     <ProjectReference Include="..\WakeCommerce.Infrastructure\WakeCommerce.Infrastructure.csproj" />
+    <ProjectReference Include="..\WakeCommerce.ServiceDefaults\WakeCommerce.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
