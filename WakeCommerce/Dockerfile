@@ -12,14 +12,15 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["WakeCommerce.ApiService/WakeCommerce.ApiService.csproj", "WakeCommerce.ApiService/"]
-COPY ["WakeCommerce.Application/WakeCommerce.Application.csproj", "WakeCommerce.Application/"]
-COPY ["WakeCommerce.Core/WakeCommerce.Core.csproj", "WakeCommerce.Core/"]
-COPY ["WakeCommerce.Domain/WakeCommerce.Domain.csproj", "WakeCommerce.Domain/"]
-COPY ["WakeCommerce.Infrastructure/WakeCommerce.Infrastructure.csproj", "WakeCommerce.Infrastructure/"]
-RUN dotnet restore "./WakeCommerce.ApiService/WakeCommerce.ApiService.csproj"
+COPY ["src/WakeCommerce.ApiService/WakeCommerce.ApiService.csproj", "src/WakeCommerce.ApiService/"]
+COPY ["src/WakeCommerce.Application/WakeCommerce.Application.csproj", "src/WakeCommerce.Application/"]
+COPY ["src/WakeCommerce.Core/WakeCommerce.Core.csproj", "src/WakeCommerce.Core/"]
+COPY ["src/WakeCommerce.Domain/WakeCommerce.Domain.csproj", "src/WakeCommerce.Domain/"]
+COPY ["src/WakeCommerce.Infrastructure/WakeCommerce.Infrastructure.csproj", "src/WakeCommerce.Infrastructure/"]
+COPY ["src/WakeCommerce.ServiceDefaults/WakeCommerce.ServiceDefaults.csproj", "src/WakeCommerce.ServiceDefaults/"]
+RUN dotnet restore "./src/WakeCommerce.ApiService/WakeCommerce.ApiService.csproj"
 COPY . .
-WORKDIR "/src/WakeCommerce.ApiService"
+WORKDIR "/src/src/WakeCommerce.ApiService"
 RUN dotnet build "./WakeCommerce.ApiService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final

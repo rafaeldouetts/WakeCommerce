@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.Integration.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.Unit.Tests", "tests\WakeCommerce.Unit.Tests\WakeCommerce.Unit.Tests.csproj", "{1212536B-8A09-4872-B9BC-063FF262FC82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WakeCommerce.ServiceDefaults", "src\WakeCommerce.ServiceDefaults\WakeCommerce.ServiceDefaults.csproj", "{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{1212536B-8A09-4872-B9BC-063FF262FC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1212536B-8A09-4872-B9BC-063FF262FC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1212536B-8A09-4872-B9BC-063FF262FC82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +86,6 @@ Global
 		{08AFB98D-E107-4319-AC5A-78CFFD631D5D} = {A6BB75FC-69BB-4FA6-A17E-72EBDB03CDEB}
 		{48228E13-E12E-44BE-8357-CDE6F5A90269} = {A6BB75FC-69BB-4FA6-A17E-72EBDB03CDEB}
 		{1212536B-8A09-4872-B9BC-063FF262FC82} = {A6BB75FC-69BB-4FA6-A17E-72EBDB03CDEB}
+		{60E45ED8-720F-43DA-AC7D-52CA94FE0A2F} = {C32652C6-9816-4D2B-8DF1-A5DB9B011EC7}
 	EndGlobalSection
 EndGlobal

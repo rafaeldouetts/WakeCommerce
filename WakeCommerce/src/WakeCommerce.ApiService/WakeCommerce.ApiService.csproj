@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>9f0c4817-e0a4-4bd9-8970-d6ca67ce0fcb</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
