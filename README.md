@@ -75,9 +75,26 @@ Aspire para criar uma aplicação escalável e de alto desempenho utilizando o f
 ### Painel
 ![alt text](docs/image26.png)
 
-## 2.3 Docker
+### Logs
+![alt text](docs/image-30.png)
+
+### Rastreamento
+![alt text](docs/image-31.png)
+
+### Metricas 
+![alt text](docs/image-29.png)
+
+## 2.3 Docker Compose
 ![alt text](docs/image-5.png)
-Utilize Docker para contêinerizar a aplicação e facilitar o processo de implantação em diferentes ambientes.
+Outra forma de inicializar nosso ambiente é utilizando o docker-compose,o Docker para contêinerizar a aplicação e facilitar o processo de implantação em diferentes ambientes.
+
+nos testes do bdd utilizei o docker-compose para iniciar todo o ambiente antes de executar os testes.
+
+para iniciar utilizando um docker-compose basta executar: 
+```bash
+    cd WakeCommerce
+    docker-compose up
+```
 
 ## 2.4 Security Tests
 ![alt text](docs/image-4.png)
@@ -161,10 +178,12 @@ Identifica falhas antes de chegarem à produção
 Melhora a qualidade do código
 Ajuda a manter boas práticas de desenvolvimento
 
-### Exemplo 
-![alt text](docs/image28.png)
 ### Ferramentas utilizadas:
 SonarQube
+
+### Exemplo 
+O SonarQube identificou que a senha do banco de dados está exposta. Isso é um alerta de segurança importante! 
+![alt text](docs/image28.png)
 
 ## 2.9 Domain Events
 Implementar Domain Events para permitir que ações específicas, como o armazenamento de dados em Redis, ocorram após eventos chave, como o cadastro de um produto. Essa abordagem garante a separação de responsabilidades e proporciona maior flexibilidade para extensões futuras, permitindo que novos comportamentos sejam adicionados facilmente sem impactar a lógica principal do sistema.
@@ -350,6 +369,66 @@ Após adicionar uma migração, você pode atualizar o banco de dados com o coma
 ```bash
 dotnet ef database update
 ```
+
+## Pipeline CI/CD
+No nosso pipeline, temos a ideia de garantir a qualidade, segurança e confiabilidade do código em cada etapa do processo de desenvolvimento. Para isso, seguimos um fluxo estruturado que inclui diversas camadas de testes e automação, assegurando que cada alteração no código seja validada antes de chegar à produção.
+
+1. Testes Unitários: São executados para validar pequenas partes da 
+aplicação isoladamente, garantindo que os componentes individuais funcionem conforme o esperado. Esses testes ajudam a detectar erros rapidamente e facilitam a manutenção do código.
+
+2. Testes de Integração: Avaliam a interação entre diferentes módulos da aplicação, garantindo que os componentes funcionem corretamente em conjunto. Esses testes são essenciais para identificar problemas que podem surgir devido à comunicação entre serviços.
+
+3. Testes de Segurança: Realizamos verificações para identificar vulnerabilidades, como exposição de credenciais, falhas de autenticação e potenciais brechas que possam comprometer a integridade dos dados. Ferramentas como SonarQube podem ser utilizadas para análise estática e detecção de riscos.
+
+4. Testes com Stryker (Mutation Testing): Aplicamos testes de mutação para medir a eficácia da nossa suíte de testes, garantindo que os testes realmente identificam falhas no código e cobrem possíveis cenários de erro.
+
+5. Deploy no Docker Hub: Após a validação de todas as etapas anteriores, a aplicação é empacotada em um contêiner Docker e publicada no Docker Hub. Isso permite que o serviço seja facilmente distribuído e implantado em diferentes ambientes com consistência e escalabilidade.
+
+![alt text](docs/image-36.png)
+
+### imagem publica no docker hub 
+![alt text](docs/image-37.png)
+
+## Deploy Kubernetes
+
+Com a imagem Docker publicada em um repositório, torna-se possível implantá-la em diversos ambientes de forma rápida e consistente. Um dos principais benefícios desse processo é a portabilidade, garantindo que a aplicação funcione da mesma maneira independentemente do ambiente de execução.
+
+Neste contexto, um exemplo prático de implantação pode ser feito utilizando Kubernetes, uma plataforma de orquestração de contêineres que automatiza o gerenciamento, escalonamento e implantação das aplicações. Com o Kubernetes, podemos definir a infraestrutura necessária por meio de arquivos de configuração (YAML), garantindo alta disponibilidade e resiliência para o serviço.
+
+![alt text](docs/image-33.png)
+
+para executar basta ter algo como o kubernetes no docker desktop ou o minikube. 
+
+1. Devemos subir o banco os bancos de dados
+    1.1 para provisionar o redis execute o seguinte comando:
+    ```bash
+        cd redis 
+        kubectl apply -f .
+    ```
+    1.2 para provisionar o sql server execute o seguinte comando:
+    ```bash
+        cd sqlserver  
+        kubectl apply -f .
+    ``` 
+    1.3 para conferir se esta tudo certo, execute o seguinte comando:
+    ```bash  
+        kubectl get pods -n wakecommerce
+    ``` 
+    e deve apresentar o seguinte resultado 
+    ![alt text](docs/image-34.png)
+
+2. Depois de conferir se as dependencias estão rodando podemos iniciar a aplicação 
+    2.1
+    ```bash
+        kubectl apply -f .
+    ```
+    2.2 conferir novamente se todos pods estão rodando 
+    ![alt text](image-5.png)
+    2.3 e aqui podemos verificar que nossa API esta sendo exposta no localhost 
+    ```bash
+        kubectl get svc -n wakecommerce
+    ```
+    ![alt text](docs/image-35.png)
 
 # 7. Dependências e Ferramentas
 Entity Framework Core para gerenciamento de banco de dados.
