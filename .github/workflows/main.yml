@@ -44,21 +44,21 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: WakeCommerce/WakeCommerce.Tests
+        working-directory: WakeCommerce/tests/WakeCommerce.Unit.Tests
 
       - name: Run Unit tests
         run: |
           dotnet tool install --global coverlet.console
           dotnet tool install --global dotnet-reportgenerator-globaltool
           dotnet test --verbosity minimal --collect:"XPlat Code Coverage"
-        working-directory: WakeCommerce/WakeCommerce.Tests
+        working-directory: WakeCommerce/tests/WakeCommerce.Unit.Tests
 
           
       - name: Generate Unit test report
         if: always()
         run: |
           reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
-          cd WakeCommerce/WakeCommerce.Tests
+          cd WakeCommerce/tests/WakeCommerce.Unit.Tests
       - name: Upload Unit test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -89,9 +89,9 @@ jobs:
       - name: Run Integration tests
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
-          dotnet test WakeCommerce/WakeCommerce.Integration.Tests/WakeCommerce.Integration.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
+          dotnet test WakeCommerce/tests/WakeCommerce.Integration.Tests/WakeCommerce.Integration.Tests.csproj --verbosity minimal --collect:"XPlat Code Coverage"
           reportgenerator "-reports:**/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
-          cd WakeCommerce/WakeCommerce.Integration.Tests
+          cd WakeCommerce/tests/WakeCommerce.Integration.Tests
         
       - name: Upload Integration tests results
         uses: actions/upload-artifact@v4
@@ -122,7 +122,7 @@ jobs:
       - name: Generate Stryker report
         if: always()
         run: |
-          cd WakeCommerce/WakeCommerce.BDD.Tests/
+          cd WakeCommerce/tests/WakeCommerce.BDD.Tests
           dotnet test 
       
       - name: Upload dotnet-stryker results
@@ -171,7 +171,7 @@ jobs:
       - name: Generate Stryker report
         if: always()
         run: |
-          cd WakeCommerce/WakeCommerce.Integration.Tests/
+          cd WakeCommerce/tests/WakeCommerce.Integration.Tests/
           dotnet tool install --global dotnet-stryker
           dotnet test 
           dotnet stryker --project WakeCommerce.Application/WakeCommerce.Application.csproj
@@ -182,7 +182,7 @@ jobs:
         if: always()
         with:
           name: dotnet-stryker-results
-          path: ./WakeCommerce/WakeCommerce.Integration.Tests/StrykerOutput
+          path: ./WakeCommerce/tests/WakeCommerce.Integration.Tests/StrykerOutput
 
   deploy:
     runs-on: ubuntu-latest
