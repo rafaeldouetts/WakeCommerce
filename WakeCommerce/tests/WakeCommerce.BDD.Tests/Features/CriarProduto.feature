@@ -7,3 +7,4 @@
     Dado que eu tenho um produto com o preco negativo
     Quando eu envio uma solicitação para criar o produto
     Entao eu devo receber um status de resposta 400
+    E eu devo receber a mesangem "O preço não pode ser menor que 0"

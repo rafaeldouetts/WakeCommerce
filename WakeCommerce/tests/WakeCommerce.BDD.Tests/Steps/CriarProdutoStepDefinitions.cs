@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using OpenTelemetry.Trace;
 using WakeCommerce.ApiService.Controllers.Base;
 using WakeCommerce.Application.Commands;
 
@@ -42,8 +43,13 @@ namespace WakeCommerce.BDD.Tests
         [Then("eu devo receber um status de resposta {int}")]
         public void ThenEuDevoReceberUmStatusDeResposta(int statusCode)
         {
-            _problemDatails.Detail.Contains("O preço não pode ser menor que 0");
             Assert.Equal((int)_response.StatusCode, statusCode);
+        }
+
+        [Then("eu devo receber a mesangem {string}")]
+        public void ThenEuDevoReceberAMesangem(string mensagem)
+        {
+            Assert.True(_problemDatails.Detail.Contains(mensagem));
         }
     }
 }

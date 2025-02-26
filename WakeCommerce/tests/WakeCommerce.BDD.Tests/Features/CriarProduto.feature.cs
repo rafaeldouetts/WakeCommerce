@@ -120,6 +120,9 @@ namespace WakeCommerce.BDD.Tests.Features
 #line 9
     await testRunner.ThenAsync("eu devo receber um status de resposta 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Entao ");
 #line hidden
+#line 10
+    await testRunner.AndAsync("eu devo receber a mesangem \"O preço não pode ser menor que 0\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }
