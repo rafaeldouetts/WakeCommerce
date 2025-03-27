@@ -2,42 +2,6 @@
 # O que foi Pedido
 ![alt text](docs/image.png)
 
-Sumário da Documentação
-
-- [Tecnologias](#fastapi-with-observability)
-  - [Redis](#table-of-contents)
-  - [.NET Aspire](#quick-start)
-  - [Docker](#explore-with-grafana)
-  - [Sql Server](#sql-server)
-
-- [Arquitetura](#estrutura-do-projeto)
-    - [CQRS](#fastapi-with-observability)
-    - [Domain Events](#fastapi-with-observability)
-    - [BDD](#fastapi-with-observability)
-    - [AutoMapper](#fastapi-with-observability)
-    - [EF Core](#fastapi-with-observability)
-        - [Code First](#fastapi-with-observability)
-- [Testes](#detail)
-    - [Unit Tests](#traces-and-logs)
-    - [Integration Tests](#fastapi-application)
-    - [BDD Tests](#span-inject)
-    - [Stryker Tests](#metrics)
-    - [Security Tests](#metrics)
-    - [Quality Tests](#metrics)
-- [Deploy](#detail)
-    - [Docker Hub](#opentelemetry-instrumentation)
-- [Monitoramento](#detail)
-    - [Prometheus](#prometheus---metrics)
-    - [Grafana](#prometheus-config)
-- [Logs](#detail)
-    - [Serilog](#grafana-data-source)
-        - [Console](#detail)
-        - [File](#detail)
-- [Kubernetes](#metrics)
-    - [Redis](#metrics)
-    - [Sql server](#metrics)
-    - [App](#metrics)
-- [Pontos de melhoria](#metrics)
 
 ### 1. Licença MIT
 A licença MIT é recomendada para desafios técnicos devido à sua natureza curta e permissiva. Ela permite que qualquer pessoa use, modifique e redistribua o código sem muitas restrições. É uma escolha popular entre empresas e desenvolvedores, pois facilita a adoção e o uso livre da solução.
@@ -189,7 +153,7 @@ O SonarQube identificou que a senha do banco de dados está exposta. Isso é um 
 ## 2.9 Domain Events
 Implementar Domain Events para permitir que ações específicas, como o armazenamento de dados em Redis, ocorram após eventos chave, como o cadastro de um produto. Essa abordagem garante a separação de responsabilidades e proporciona maior flexibilidade para extensões futuras, permitindo que novos comportamentos sejam adicionados facilmente sem impactar a lógica principal do sistema.
 
-## 2.10 Monitoria (Logs e Performance)
+## 2.10 Monitoria (Prometheus)
 ![alt text](docs/image-7.png)
 Implemente monitoramento da aplicação, incluindo logs e métricas de performance, para garantir que a operação seja eficiente e qualquer problema seja rapidamente detectado.
 
@@ -197,11 +161,11 @@ Implemente monitoramento da aplicação, incluindo logs e métricas de performan
 ![alt text](docs/image-0.png)
 Adote a prática de BDD para garantir que os requisitos de negócio sejam claramente definidos e compreendidos por todas as partes envolvidas no desenvolvimento.
 
-## 2.12 OpenTelemetry
+## 2.12 Monitoria (OpenTelemetry)
 ![alt text](docs/image-6.png)
 Utilize OpenTelemetry para coleta de métricas e rastreamento distribuído da aplicação, ajudando na visibilidade e monitoramento da saúde do sistema.
 
-## 2.13 HealthChecks
+## 2.13 Monitoria (HealthChecks)
 ![alt text](docs/image-3.png)
 Implemente HealthChecks para monitorar a saúde dos serviços e garantir que todos os componentes estejam funcionando corretamente.
 
@@ -328,6 +292,7 @@ perf: melhorias de performance
 
 ## 5.2 Configuração de CORS e API Documentation
 A configuração de CORS é essencial para habilitar o Scalar como documentação da API. Isso envolve a configuração do Program.cs e do launchSettings.json.
+
 ![alt text](docs/image-12.png)
 ![alt text](docs/image-13.png)
 ![alt text](docs/image-14.png)
@@ -343,6 +308,7 @@ As respostas da API devem ser padronizadas, utilizando ProblemDetails para erros
 ![alt text](docs/image-8.png)
 
 E SuccessResponse para respostas bem-sucedidas.
+
 ![alt text](docs/image-9.png)
 
 # 6 Migrations com Entity Framework
@@ -415,10 +381,11 @@ para executar basta ter algo como o kubernetes no docker desktop ou o minikube.
     ```bash  
         kubectl get pods -n wakecommerce
     ``` 
-    e deve apresentar o seguinte resultado 
+    e deve apresentar o seguinte resultado
+   
     ![alt text](docs/image-34.png)
 
-2. Depois de conferir se as dependencias estão rodando podemos iniciar a aplicação 
+3. Depois de conferir se as dependencias estão rodando podemos iniciar a aplicação 
     2.1
     ```bash
         kubectl apply -f .
@@ -453,3 +420,7 @@ https://grafana.com/grafana/dashboards/20568-opentelemetry-dotnet-webapi/
 esse metrica do prometheus db_client_operation_duration_seconds_bucket 
 provavelmente é algo do sql server acho que da para montar um grafico tbm 
 
+# 8. Dependências
+1. Docker 
+2. Minikube 
+3. .Net 9
