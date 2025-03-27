@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
 using WakeCommerce.ApiService.Extenssions;
 using Serilog;
-using Serilog.Events;
 using WakeCommerce.ServiceDefaults;
+using Prometheus;
+using Serilog.Enrichers.Span;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,17 +23,12 @@ builder.Configuration
     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
 .AddEnvironmentVariables();
 
-builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Console(LogEventLevel.Debug)
-    .WriteTo.File($"log-{DateTime.UtcNow.ToString("dd/MM/yyyy")}.txt",
-        LogEventLevel.Warning,
-        rollingInterval: RollingInterval.Day));
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration)
+    .Enrich.WithSpan(new SpanOptions() { IncludeOperationName = true, IncludeTags = true }));
 
 builder.Services.AddDependencies(builder);
 
-
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
 
 var app = builder.Build();
 
@@ -46,9 +42,6 @@ using (var scope = app.Services.CreateScope())
     dbContext.UploadProdutos();  // Faz a carga de produtos
 }
 
-//add opentelemetry exporter prometheus 
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
-
 // Add Cors
 app.UseCors("AllowSpecificOrigin");
 
@@ -60,6 +53,8 @@ app.MapScalarApiReference(opt =>
     opt.DefaultHttpClient = new(ScalarTarget.Http, ScalarClient.Http11);
 
 });
+
+app.MapDefaultEndpoints();
 
 app.UseHttpsRedirection();
 
@@ -79,6 +74,12 @@ app.MapHealthChecks("/healthz", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
+
+
+app.UseMetricServer();
+app.UseHttpMetrics();
+
+//app.UseSerilogRequestLogging();
 
 app.Run();
 

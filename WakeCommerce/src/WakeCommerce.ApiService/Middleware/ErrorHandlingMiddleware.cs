@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
 using WakeCommerce.ApiService.Controllers.Base;
 using Serilog;
+using System.Diagnostics;
+using OpenTelemetry.Trace;
+using Serilog.Context;
 
 namespace WakeCommerce.ApiService.Middleware
 {
@@ -14,6 +17,12 @@ namespace WakeCommerce.ApiService.Middleware
         {
             try
             {
+                var traceId = Activity.Current?.TraceId.ToString() ?? "no-trace-id";
+
+                var teste = context.Request.HttpContext.TraceIdentifier;
+
+                LogContext.PushProperty("TraceId", traceId);
+
                 await _next(context);
             }
             catch (Exception ex)
@@ -21,6 +30,12 @@ namespace WakeCommerce.ApiService.Middleware
                 Log.Error(ex, "Erro não tratado ocorreu na requisição {Method} {Path}",
                     context.Request.Method,
                     context.Request.Path);
+
+                Activity.Current?.SetStatus(ActivityStatusCode.Error);
+                Activity.Current?.RecordException(ex, new TagList
+                {
+                    {"system.erro", ex.Message }
+                });
 
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 

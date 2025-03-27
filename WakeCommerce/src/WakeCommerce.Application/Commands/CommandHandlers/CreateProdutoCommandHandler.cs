@@ -1,5 +1,7 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics;
+using AutoMapper;
 using MediatR;
+using OpenTelemetry.Trace;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Events;
 using WakeCommerce.Application.Queries.Response;
@@ -16,27 +18,37 @@ namespace WakeCommerce.Application.CommandHandlers
         private readonly IProdutoRepository _produtoRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
-        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository, IMediator mediator, IMapper mapper)
+        private readonly Tracer _tracer;
+        public CreateProdutoCommandHandler(IMediatorHandler mediatorHandler, IProdutoRepository produtoRepository, IMediator mediator, IMapper mapper, TracerProvider tracerProvider)
         {
             _mediatorHandler = mediatorHandler;
             _produtoRepository = produtoRepository;
             _mediator = mediator;
             _mapper = mapper;
+            _tracer = tracerProvider.GetTracer("WakeCommerceActivitySource");
         }
 
         public async Task<ProdutoResponse?> Handle(CreateProdutoCommand message, CancellationToken cancellationToken)
         {
-            if (!ValidarComando(message)) return null;
+            using (var span = _tracer.StartActiveSpan(nameof(CreateProdutoCommandHandler)))
+            {
+                span.SetAttribute("command.type", nameof(CreateProdutoCommand));
+                span.SetAttribute("service.name", "ProdutoService");
 
-            var produto = _mapper.Map<Produto>(message);
+                if (!ValidarComando(message)) return null;
 
-            await _produtoRepository.Adicionar(produto);
+                var produto = _mapper.Map<Produto>(message);
 
-            var response = _mapper.Map<ProdutoResponse>(produto);
+                await _produtoRepository.Adicionar(produto);
 
-            await _mediator.Publish(new ProdutoCreateEvent(response));
+                var response = _mapper.Map<ProdutoResponse>(produto);
 
-            return response;
+                await _mediator.Publish(new ProdutoCreateEvent(response));
+
+                span.SetAttribute("status", "success");
+
+                return response;
+            }
         }
 
         private bool ValidarComando(CreateProdutoCommand message)
@@ -47,6 +59,15 @@ namespace WakeCommerce.Application.CommandHandlers
             {
                 _mediatorHandler.PublicarNotificacao(new DomainNotification("", error.ErrorMessage));
             }
+
+            Activity.Current.AddEvent(new ActivityEvent(
+                "ValidationFailed",
+                tags: new ActivityTagsCollection(new List<KeyValuePair<string, object?>>
+                {
+                    new ("model.type", nameof(CreateProdutoCommand)),
+                    new ("model.failed_field", nameof(message.Preco))
+                })
+            ));
 
             return false;
         }

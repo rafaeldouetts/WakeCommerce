@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: wakecommerce
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+    scrape_configs:
+      - job_name: 'WakeCommerceApi'
+        static_configs:
+          - targets:
+              - 'wakecommerce:8080'
+        metrics_path: '/metrics'

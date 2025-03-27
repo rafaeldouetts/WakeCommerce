@@ -1,6 +1,8 @@
 ﻿
+using System.Diagnostics;
 using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Trace;
 using WakeCommerce.Domain.Entities;
 using WakeCommerce.Domain.Repositories;
 using WakeCommerce.Infrastructure.Data;
@@ -10,17 +12,27 @@ namespace WakeCommerce.Infrastructure.Repository
     public class ProdutoRepository : IProdutoRepository
     {
         private readonly WakeCommerceDbContext _context;
-
-        public ProdutoRepository(WakeCommerceDbContext context)
+        private readonly Tracer _tracer;
+        public ProdutoRepository(WakeCommerceDbContext context, TracerProvider tracerProvider)
         {
             _context = context;
+            _tracer = tracerProvider.GetTracer("WakeCommerceActivitySource");
         }
 
         public async Task Adicionar(Produto produto)
         {
-           await _context.Produtos.AddAsync(produto);
-           
-           _context.SaveChanges();
+            using (var span = _tracer.StartActiveSpan(nameof(IProdutoRepository)))
+            {
+                span.SetAttribute("command.type", nameof(ProdutoRepository));
+                span.SetAttribute("service.name", "ProdutoService");
+    
+                await _context.Produtos.AddAsync(produto);
+                await _context.SaveChangesAsync();
+
+                await _context.DisposeAsync();
+
+                span.AddEvent("Salvo no SQL Server");
+            }
         }
 
         public async Task<bool> Delete(int id)

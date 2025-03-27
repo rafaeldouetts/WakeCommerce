@@ -438,3 +438,18 @@ Coverlet para cobertura de código.
 Docker para contêinerização.
 OpenTelemetry para rastreamento distribuído.
 FluentValidator para validação de dados.
+'
+
+IMPORTANTE 
+dotnet add package OpenTelemetry.Instrumentation.Process --prerelease
+dotnet add package OpenTelemetry.Instrumentation.StackExchangeRedis --prerelease
+dotnet add package OpenTelemetry.Instrumentation.SqlClient --prerelease
+
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore --prerelease
+dotnet add package OpenTelemetry.Instrumentation.Http --prerelease
+
+https://grafana.com/grafana/dashboards/20568-opentelemetry-dotnet-webapi/
+
+esse metrica do prometheus db_client_operation_duration_seconds_bucket 
+provavelmente é algo do sql server acho que da para montar um grafico tbm 
+

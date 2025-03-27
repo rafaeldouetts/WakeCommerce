@@ -1,5 +1,9 @@
-﻿using MediatR;
+﻿using System.Diagnostics;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OpenTelemetry.Trace;
+using Serilog.Context;
+using WakeCommerce.ApiService.Controllers.Base.ActivitySources;
 using WakeCommerce.Application.Commands;
 using WakeCommerce.Application.Queries;
 using WakeCommerce.Application.Queries.Request;
@@ -14,29 +18,67 @@ namespace WakeCommerce.ApiService.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IFindProdutoQueryHandler _findProdutoQueryHandler;
+        private readonly ILogger<ProdutoController> _logger;
 
+        private readonly Tracer _tracer;
         public ProdutoController(
             INotificationHandler<DomainNotification> notifications, 
             IMediatorHandler mediatorHandler, 
             IMediator mediator, 
-            IFindProdutoQueryHandler findProdutoQueryHandler)
+            IFindProdutoQueryHandler findProdutoQueryHandler, 
+            ILogger<ProdutoController> logger,
+            TracerProvider tracerProvider)
             : base(notifications)
         {
+            _logger = logger;
             _mediator = mediator;
             _findProdutoQueryHandler = findProdutoQueryHandler;
+
+            _tracer = tracerProvider.GetTracer("WakeCommerceActivitySource");
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> Post([FromBody] CreateProdutoCommand command)
         {
-            var produtoCriado = await _mediator.Send(command);
-
-            if (!OperacaoValida())
+            using (var createProdutoSpan = _tracer.StartActiveSpan(DiagnosticNames.CriarProduto))
             {
-                return BadRequest(ObterMensagensErro());
-            }
+                createProdutoSpan.SetAttribute("produto.nome", command.Nome);
 
-            return Created("by-id", produtoCriado);
+                using (LogContext.PushProperty("TraceId", Activity.Current?.TraceId.ToString()))
+                {
+                    _logger.LogInformation("Send Command");
+                }
+
+                using (var validaProdutoSpan = _tracer.StartActiveSpan(DiagnosticNames.ValidarProduto))
+                {
+                    if (!OperacaoValida())
+                    {
+                        _logger.LogInformation("Operação inválida ao criar o produto");
+
+                        validaProdutoSpan.SetAttribute("produto.valid", "false");
+                        validaProdutoSpan.AddEvent("Produto Invalido");
+
+                        return BadRequest(ObterMensagensErro());
+                    }
+                    else 
+                    {
+                        validaProdutoSpan.SetAttribute("produto.valid", "true");
+                        validaProdutoSpan.AddEvent("Produto Valido");
+                    }
+
+                }
+
+                using (var validaProdutoSpan = _tracer.StartActiveSpan("SalvarProduto"))
+                {
+                    var produtoCriado = await _mediator.Send(command);
+
+                    createProdutoSpan.AddEvent("Produto cadastrado");
+
+                    DiagnosticsConfig.ProdutosCadastrados.Add(1);
+
+                    return Created("by-id", produtoCriado);
+                }
+            }
         }
 
         [HttpPut("{id}")]
@@ -98,6 +140,12 @@ namespace WakeCommerce.ApiService.Controllers
             var result = await _findProdutoQueryHandler.GetProdutos(query);
 
             return Ok(result);
+        }
+
+        [HttpGet("erro")]
+        public async Task<IActionResult> Error()
+        {
+            throw new Exception("Erro simulado");
         }
     }
 }

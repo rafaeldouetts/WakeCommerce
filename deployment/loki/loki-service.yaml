@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-service
+  namespace:  wakecommerce
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3100         # Porta exposta pelo serviço
+      targetPort: 3100   # Porta do container do pod que será direcionada
+      protocol: TCP
+  selector:
+    app: loki           # Seleciona os pods com o label 'app: loki'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-grpc
+  namespace: wakecommerce
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 9095         # Porta exposta pelo serviço
+      targetPort: 9095   # Porta do container do pod que será direcionada
+      protocol: TCP
+  selector:
+    app: loki           # Seleciona os pods com o label 'app: loki'

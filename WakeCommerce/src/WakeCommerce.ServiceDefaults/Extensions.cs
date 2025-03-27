@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Diagnostics.Metrics;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -7,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace WakeCommerce.ServiceDefaults
@@ -15,8 +19,6 @@ namespace WakeCommerce.ServiceDefaults
     {
         public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
         {
-            builder.ConfigureOpenTelemetry();
-
             builder.AddDefaultHealthChecks();
 
             // Uncomment the following to restrict the allowed schemes for service discovery.
@@ -34,23 +36,50 @@ namespace WakeCommerce.ServiceDefaults
             {
                 logging.IncludeFormattedMessage = true;
                 logging.IncludeScopes = true;
+                logging.SetResourceBuilder(
+                        ResourceBuilder.CreateDefault()
+                        .AddService("Loggin.NET"));
             });
 
-            builder.Services.AddOpenTelemetry()
-                .WithMetrics(metrics =>
-                {
-                    metrics.AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddRuntimeInstrumentation();
-                })
-                .WithTracing(tracing =>
-                {
-                    tracing.AddSource(builder.Environment.ApplicationName)
-                        .AddAspNetCoreInstrumentation()
-                        // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
-                        //.AddGrpcClientInstrumentation()
-                        .AddHttpClientInstrumentation();
-                });
+            //builder.Services.AddOpenTelemetry()
+            //    .WithTracing(tracing =>
+            //    {
+            //        tracing
+            //            .AddSource("WakeCommerceActivitySource")
+            //            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: "WakeCommerceApi", serviceVersion:"1"))
+            //            .AddAspNetCoreInstrumentation()
+            //            .AddHttpClientInstrumentation()
+            //            .AddSqlClientInstrumentation()
+            //            .SetSampler(new AlwaysOnSampler())
+            //            .AddRedisInstrumentation()
+            //            // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
+            //            //.AddGrpcClientInstrumentation()
+            //            .AddHttpClientInstrumentation();
+
+            //        if (builder.Environment.EnvironmentName != "Aspire")
+            //        {
+            //            tracing.AddOtlpExporter(options =>
+            //            {
+            //                options.Endpoint = new Uri(builder.Configuration.GetConnectionString("tempo")); // Endereço do Grafana Tempo
+            //            }).SetSampler(new AlwaysOnSampler());
+            //        }
+            //        else
+            //        {
+            //            tracing.AddOtlpExporter();
+            //        }
+            //    })
+            //    .WithMetrics(metrics =>
+            //    {
+            //        metrics
+            //            .AddAspNetCoreInstrumentation()
+            //            .AddHttpClientInstrumentation()
+            //            .AddProcessInstrumentation()
+            //            .AddRuntimeInstrumentation()
+            //            .AddSqlClientInstrumentation()
+            //            .AddMeter(DiagnosticsConfig.Meter.Name)
+            //            .AddPrometheusExporter();
+            //    });
+
 
             builder.AddOpenTelemetryExporters();
 
@@ -63,7 +92,8 @@ namespace WakeCommerce.ServiceDefaults
 
             if (useOtlpExporter)
             {
-                builder.Services.AddOpenTelemetry().UseOtlpExporter();
+                builder.Services.AddOpenTelemetry()
+                    .UseOtlpExporter();
             }
 
             // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
@@ -101,7 +131,19 @@ namespace WakeCommerce.ServiceDefaults
                 });
             }
 
+            app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
             return app;
+        }
+
+        public static class DiagnosticsConfig
+        {
+            public const string ServiceName = "WakeCommerceActivitySource";
+
+            public static Meter Meter = new(ServiceName);
+            public static ActivitySource Source = new(ServiceName);
+
+            public static Counter<long> ProdutosCadastrados = Meter.CreateCounter<long>("Produtos.count");
         }
     }
 }

@@ -1,0 +1,138 @@
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "1m"
+    max-file: "1"
+    tag: "{{.Name}}"
+
+x-labels:
+  &default-labels
+  logging: "promtail"
+  logging_jobname: "containerlogs"
+
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: database
+    ports:
+      - "1433:1433"
+    volumes:
+    - dbdata:/var/opt/mssql
+    environment:
+      MSSQL_TCP_PORT: 1433
+      MSSQL_SA_PASSWORD: "P@55w0rd"
+      ACCEPT_EULA: "Y"
+    networks:
+      - traces
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "P@55w0rd", "-Q", "SELECT 1"]
+      interval: 10s  # Checa a cada 10 segundos
+      timeout: 5s     # Aguarda até 5s pela resposta
+      retries: 5      # Tenta 5 vezes antes de considerar como "não saudável"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - traces
+
+  wakecommerce-service:
+    container_name: wakecommerce-service
+    image: wakecommerce
+    environment:
+      - ENVIRONMENT_NAME=Test
+      - ASPNETCORE_ENVIRONMENT=Test
+      - SERVICE_NAME=wakecommerce-service
+    ports:
+      - "5000:8081"
+      - "5001:8080"
+    depends_on:
+    - redis
+    - database
+    
+    networks:
+      - traces
+    labels: *default-labels
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_USERS_DEFAULT_THEME=dark
+    volumes:
+      - ./configs/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/provisioning-datasources.yaml:ro
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/dashboards:ro  # Diretório onde seus arquivos JSON de dashboards estão localizados
+    depends_on:
+      - tempo
+    networks:
+      - traces
+    logging: *default-logging
+
+  tempo:
+    image: grafana/tempo:2.3.1
+    container_name: tempo
+    ports:
+      - 3200:3200   # tempo http
+      - 9095:9095   # tempo grpc
+      - 14268:14268 # jaeger ingest
+      - 4318:4318   # otlp http
+      - 4317:4317   # otlp grpc
+    volumes:
+      - ./configs/tempo/tempo-local.yaml:/etc/tempo-local.yaml
+    command: ["-config.file=/etc/tempo-local.yaml"]
+    networks:
+      - traces
+    logging: *default-logging
+
+  loki:
+    image: grafana/loki:2.9.7
+    container_name: loki
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - traces
+    logging: *default-logging
+
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./configs/prometheus/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+    networks:
+      - traces
+    logging: *default-logging
+
+  pyroscope:
+    image: grafana/pyroscope
+    ports:
+    - 4040:4040
+    networks:
+    - traces
+
+volumes:
+  dbdata:
+  redis-data:
+    driver: local
+
+networks:
+  traces:
+    name: traces
+    driver: bridge

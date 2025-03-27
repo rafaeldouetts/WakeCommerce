@@ -21,6 +21,12 @@ using WakeCommerce.Application.CommandHandlers;
 using WakeCommerce.Application.QueryHandlers;
 using WakeCommerce.Application.Events;
 using WakeCommerce.Application.Events.EventHandlers;
+using Serilog.Enrichers.Span;
+using Serilog.Sinks.Grafana.Loki;
+using OpenTelemetry.Logs;
+using WakeCommerce.ServiceDefaults;
+using System.Diagnostics;
+using WakeCommerce.ApiService.Controllers.Base.ActivitySources;
 
 namespace WakeCommerce.ApiService.Extenssions
 {
@@ -37,7 +43,7 @@ namespace WakeCommerce.ApiService.Extenssions
 
             //builder.Services.AddSerilogLogging();
             builder.Services.AddDatabase(builder);
-            builder.Services.AddOpenTelemetry(builder.Configuration);
+            builder.Services.AddOpenTelemetry(builder);
             builder.Services.AddRedisCache(builder);
             builder.Services.AddDICors(builder.Configuration);
 
@@ -56,12 +62,62 @@ namespace WakeCommerce.ApiService.Extenssions
 
         private static void AddSerilog(WebApplicationBuilder builder)
         {
-            builder.Host.UseSerilog((ctx, lc) => lc
-                        .WriteTo.Console(LogEventLevel.Debug)
-                        .WriteTo.File($"log-{DateTime.UtcNow.ToString("dd/MM/yyyy")}.txt",
-                            LogEventLevel.Warning,
-                            rollingInterval: RollingInterval.Day)
-                        );
+            //builder.Services.AddSerilog((ctx, lc) => lc
+            //            .WriteTo.Console(LogEventLevel.Debug)
+            //            .WriteTo.GrafanaLoki(builder.Configuration.GetConnectionString("loki"), new List<LokiLabel>()
+            //            {
+            //               new LokiLabel()
+            //               {
+            //                   Key = "service_name",
+            //                   Value = "WakeCommercer"
+            //               },
+            //               new LokiLabel()
+            //               {
+            //                   Key = "using_database",
+            //                   Value = "true"
+            //               }
+            //            })
+            //            .Enrich.WithSpan(new SpanOptions() { IncludeOperationName = true, IncludeTags = true })
+            //            );
+
+            //builder.Host.UseSerilog((ctx, lc) => lc
+            //            .WriteTo.Console(LogEventLevel.Debug)
+            //            .WriteTo.File($"log-{DateTime.UtcNow.ToString("dd/MM/yyyy")}.txt",
+            //                LogEventLevel.Warning,
+            //                rollingInterval: RollingInterval.Day)
+            //            .WriteTo.GrafanaLoki(builder.Configuration.GetConnectionString("loki"), new List<LokiLabel>()
+            //            {
+            //               new LokiLabel()
+            //               {
+            //                   Key = "service_name",
+            //                   Value = "WakeCommercer"
+            //               },
+            //               new LokiLabel()
+            //               {
+            //                   Key = "using_database",
+            //                   Value = "true"
+            //               }
+            //            })
+            //            .Enrich.WithSpan(new SpanOptions() { IncludeOperationName = true, IncludeTags = true }));
+
+
+            //builder.Logging.ClearProviders()
+            //    .AddConsole()
+            //    .AddDebug()
+            //    .AddOpenTelemetry(opt =>
+            //    {
+            //        opt.AddConsoleExporter()
+            //        .SetResourceBuilder(
+            //            ResourceBuilder.CreateDefault()
+            //            .AddService("Loggin.NET"))
+            //            .IncludeScopes = true;
+            //    });
+
+            //builder.Services.AddLogging();
+
+            //builder.Host.UseSerilog((context, configuration) =>
+            //            configuration.ReadFrom.Configuration(context.Configuration)
+            //            .Enrich.WithSpan(new SpanOptions() { IncludeOperationName = true, IncludeTags = true }));
         }
 
         private static void AddDatabase(this IServiceCollection services, WebApplicationBuilder builder)
@@ -77,15 +133,21 @@ namespace WakeCommerce.ApiService.Extenssions
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         }
 
-        private static void AddOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
+        private static void AddOpenTelemetry(this IServiceCollection services, WebApplicationBuilder builder)
         {
+            var environment = builder.Environment.EnvironmentName;
+
             services.AddOpenTelemetry()
-                    .ConfigureResource(resource => resource.AddService("WakeCommerceAPI"))
+                    .ConfigureResource(resource => resource.AddService("WakeCommerceApi-2"))
                     .WithMetrics(metrics =>
                     {
                         metrics.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
-                                                 //metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
+                        metrics.AddRuntimeInstrumentation();    // Monitorar .NET Runtime (CPU, GC, Threads)
+                        metrics.AddProcessInstrumentation();
+                        metrics.AddSqlClientInstrumentation();
                         //metrics.AddConsoleExporter();           // Exportar métricas para o console
+
+                        metrics.AddMeter(DiagnosticsConfig.Meter.Name);
                         metrics.AddPrometheusExporter(options =>
                         {
                             options.ScrapeEndpointPath = "/metrics"; // Definir endpoint
@@ -94,14 +156,34 @@ namespace WakeCommerce.ApiService.Extenssions
                     })
                     .WithTracing(tracing =>
                     {
+                        tracing.AddSource("WakeCommerceActivitySource");
+                        tracing.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: "WakeCommercer"));
+                        tracing.SetSampler(new AlwaysOnSampler());
                         tracing.AddAspNetCoreInstrumentation(); // Monitorar requisições HTTP
-                        //tracing.AddConsoleExporter();           // Exportar traces para o console
+                        tracing.AddHttpClientInstrumentation();
+                        tracing.AddSqlClientInstrumentation();
+                        tracing.AddRedisInstrumentation();
+                        tracing.AddConsoleExporter() // Exportar traces para o console
+                        .SetSampler(new AlwaysOnSampler());           
+
+                        if(builder.Environment.EnvironmentName != "Aspire")
+                        {
+                            tracing.AddOtlpExporter(options =>
+                             {
+                                 options.Endpoint = new Uri(builder.Configuration.GetConnectionString("tempo")); // Endereço do Grafana Tempo
+                             }).SetSampler(new AlwaysOnSampler());
+                        }
+                        else
+                        {
+                            tracing.AddOtlpExporter();
+                        }
                     });
 
             // Configuração de HealthChecks
-            services.AddHealthChecks()
-                .AddSqlServer(configuration.GetConnectionString("DefaultConnection"))
-                .AddRedis(configuration.GetConnectionString("RedisConnection")!, "Redis");
+            if (environment != "Aspire")
+                services.AddHealthChecks()
+                        .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+                        .AddRedis(builder.Configuration.GetConnectionString("RedisConnection")!, "Redis");
         }
 
         private static void AddRedisCache(this IServiceCollection services, WebApplicationBuilder builder)
